@@ -16,7 +16,7 @@ def create_app():
     migrate.init_app(app, db)
     jwt.init_app(app)
 
-    # Import and register blueprints
+    # import and register blueprints
     from .routes.auth import auth_bp
     from .routes.questions import questions_bp
     from .routes.answers import answers_bp

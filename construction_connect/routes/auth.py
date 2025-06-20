@@ -27,7 +27,7 @@ def register():
     return {"message": "User registered"}, 201
 
 
-#  Login 
+#  login 
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.get_json() or {}
