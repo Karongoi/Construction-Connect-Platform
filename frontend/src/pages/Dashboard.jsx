@@ -34,10 +34,18 @@ function Dashboard() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-4">Welcome, {user.username}</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Welcome, {user.username}</h1>
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+          onClick={() => navigate("/ask")}
+        >
+          Ask a Question
+        </button>
+      </div>
+
       <p className="text-lg mb-6">Role: {user.role}</p>
 
-      {/* Role-specific Dashboards */}
       {user.role === "Apprentice" && (
         <div className="bg-blue-100 p-4 rounded-lg mb-6">
           <h2 className="text-xl font-semibold">Apprentice Dashboard</h2>
@@ -59,7 +67,6 @@ function Dashboard() {
         </div>
       )}
 
-      {/* Show Questions to All Users */}
       <QuestionList role={user.role} />
     </div>
   );

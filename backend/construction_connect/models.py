@@ -1,4 +1,4 @@
-from . import db  # Import the db instance from __init__.py
+from . import db
 
 class User(db.Model):
     __tablename__ = "users"
@@ -13,14 +13,18 @@ class User(db.Model):
     questions = db.relationship("Question", backref="user", lazy=True, cascade="all, delete-orphan")
     answers = db.relationship("Answer", backref="user", lazy=True, cascade="all, delete-orphan")
 
+
 class Question(db.Model):
     __tablename__ = "questions"
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(150), nullable=False)
     body = db.Column(db.Text, nullable=False)
-    tags = db.Column(db.String(200))  
+    tags = db.Column(db.String(200))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
     answers = db.relationship("Answer", backref="question", lazy=True, cascade="all, delete-orphan")
+
 
 class Answer(db.Model):
     __tablename__ = "answers"
@@ -28,16 +32,19 @@ class Answer(db.Model):
     body = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     question_id = db.Column(db.Integer, db.ForeignKey("questions.id"), nullable=False)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
 
 class Mentorship(db.Model):
     __tablename__ = "mentorships"
     id = db.Column(db.Integer, primary_key=True)
     apprentice_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     mentor_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    status = db.Column(db.String(20), default="pending")  # pending / accepted / rejected
+    status = db.Column(db.String(20), default="pending")
 
     apprentice = db.relationship("User", foreign_keys=[apprentice_id], backref="requested_mentorships")
     mentor = db.relationship("User", foreign_keys=[mentor_id], backref="mentorship_requests")
+
 
 class MentorshipRequest(db.Model):
     __tablename__ = "mentorship_requests"
@@ -45,5 +52,5 @@ class MentorshipRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     apprentice_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     mentor_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    status = db.Column(db.String(50), default="pending")  # pending, approved, rejected
+    status = db.Column(db.String(50), default="pending")
     created_at = db.Column(db.DateTime, server_default=db.func.now())

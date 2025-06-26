@@ -1,7 +1,14 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function Navbar() {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -17,12 +24,14 @@ function Navbar() {
         Construction Connect
       </h1>
 
-      <button
-        onClick={handleLogout}
-        className="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100 transition"
-      >
-        Logout
-      </button>
+      {isLoggedIn && (
+        <button
+          onClick={handleLogout}
+          className="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100 transition"
+        >
+          Logout
+        </button>
+      )}
     </nav>
   );
 }

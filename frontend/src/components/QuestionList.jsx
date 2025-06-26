@@ -2,43 +2,47 @@ import { useEffect, useState } from "react";
 
 function QuestionList() {
   const [questions, setQuestions] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/questions")
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:5000/questions/", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
-      .then((data) => {
-        setQuestions(data.questions || []);
-        setLoading(false);
-      })
+      .then(setQuestions)
       .catch((err) => {
         console.error("Failed to load questions:", err);
-        setLoading(false);
       });
   }, []);
 
-  if (loading) {
-    return <p className="text-gray-500">Loading questions...</p>;
-  }
-
-  if (questions.length === 0) {
-    return <p className="text-gray-600">No questions have been posted yet.</p>;
-  }
-
   return (
-    <div className="mt-4 space-y-4">
-      {questions.map((q) => (
-        <div
-          key={q.id}
-          className="bg-white border border-gray-200 shadow-md rounded-lg p-4"
-        >
-          <h3 className="text-xl font-bold text-blue-700">{q.title}</h3>
-          <p className="text-gray-800">{q.description}</p>
-          <p className="text-sm text-gray-500 mt-2">
-            Asked by: {q.asked_by || "Unknown"}
-          </p>
-        </div>
-      ))}
+    <div className="max-w-4xl mx-auto p-6">
+      <h2 className="text-3xl font-bold mb-6 text-center">Latest Questions</h2>
+
+      {questions.length === 0 ? (
+        <p className="text-gray-500 text-center">No questions yet.</p>
+      ) : (
+        <ul className="space-y-4">
+          {questions.map((q) => (
+            <li
+              key={q.id}
+              className="bg-white p-6 rounded-xl shadow hover:shadow-md transition"
+            >
+              <h3 className="text-xl font-semibold text-blue-700 mb-2">
+                {q.title}
+              </h3>
+              <p className="text-gray-700 mb-3">{q.body}</p>
+              <div className="text-sm text-gray-500 flex justify-between">
+                <span>Asked by: <strong>{q.asked_by}</strong></span>
+                <span>{new Date(q.created_at).toLocaleString()}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
