@@ -26,7 +26,7 @@ function Signup() {
 
       if (res.ok) {
         alert("Account created!");
-        navigate("/login");
+        navigate("/dashboard");
       } else {
         alert(data.error || "Signup failed");
       }
