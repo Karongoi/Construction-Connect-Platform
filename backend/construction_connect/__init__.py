@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 from .config import Config
 
 db = SQLAlchemy()
@@ -15,8 +16,9 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-
-    # Import blueprints
+    
+    CORS(app)  
+    # Import and register blueprints
     from .routes.auth import auth_bp
     from .routes.questions import questions_bp
     from .routes.answers import answers_bp
