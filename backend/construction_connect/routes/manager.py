@@ -2,12 +2,17 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from construction_connect.models import db, User, Answer, Question
 from construction_connect.helpers import is_manager
+from flask_cors import cross_origin
 
 manager_bp = Blueprint("manager_bp", __name__)
 
-# Get all users
+
+# USER MANAGEMENT
+
+
 @manager_bp.route("/users", methods=["GET"])
 @jwt_required()
+@cross_origin(origin='http://localhost:5173')
 def get_all_users():
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
@@ -18,9 +23,9 @@ def get_all_users():
         for u in users
     ]), 200
 
-# Update user role
 @manager_bp.route("/users/<int:user_id>/role", methods=["PATCH"])
 @jwt_required()
+@cross_origin(origin='http://localhost:5173')
 def update_user_role(user_id):
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
@@ -36,9 +41,13 @@ def update_user_role(user_id):
     db.session.commit()
     return jsonify({"message": f"User role updated to {new_role}"}), 200
 
-# Delete an answer
+
+# ANSWER MODERATION
+
+
 @manager_bp.route("/answers/<int:answer_id>", methods=["DELETE"])
 @jwt_required()
+@cross_origin(origin='http://localhost:5173')
 def delete_answer(answer_id):
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
@@ -51,9 +60,13 @@ def delete_answer(answer_id):
     db.session.commit()
     return jsonify({"message": "Answer deleted"}), 200
 
-# Dashboard summary
+
+# DASHBOARD & STATS
+
+
 @manager_bp.route("/dashboard", methods=["GET"])
 @jwt_required()
+@cross_origin(origin='http://localhost:5173')
 def dashboard():
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
@@ -64,16 +77,15 @@ def dashboard():
         "total_answers": Answer.query.count(),
     }), 200
 
-# User stats summary
 @manager_bp.route("/user-stats", methods=["GET"])
 @jwt_required()
+@cross_origin(origin='http://localhost:5173')
 def user_stats():
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
 
     users = User.query.all()
     stats = []
-
     for user in users:
         stats.append({
             "id": user.id,
@@ -86,15 +98,18 @@ def user_stats():
 
     return jsonify(stats), 200
 
-# Get all questions (filter by answered/unanswered/all)
+
+# QUESTION MODERATION
+
+
 @manager_bp.route("/moderate/questions", methods=["GET"])
 @jwt_required()
+@cross_origin(origin='http://localhost:5173')
 def get_all_questions_for_moderation():
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
 
-    answered = request.args.get("answered")  # answered=true or ?answered=false
-
+    answered = request.args.get("answered")
     if answered is not None:
         is_answered = answered.lower() == "true"
         questions = Question.query.filter_by(is_answered=is_answered).order_by(Question.created_at.desc()).all()
@@ -115,9 +130,9 @@ def get_all_questions_for_moderation():
         for q in questions
     ]), 200
 
-# Delete a question
 @manager_bp.route("/moderate/questions/<int:question_id>", methods=["DELETE"])
 @jwt_required()
+@cross_origin(origin='http://localhost:5173')
 def delete_question(question_id):
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
@@ -130,9 +145,9 @@ def delete_question(question_id):
     db.session.commit()
     return jsonify({"message": f"Question ID {question_id} deleted"}), 200
 
-# Mark a question as answered (with CORS preflight support)
 @manager_bp.route("/moderate/questions/<int:question_id>/mark-answered", methods=["PATCH", "OPTIONS"])
 @jwt_required(optional=True)
+@cross_origin(origin='http://localhost:5173', methods=["PATCH", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
 def mark_question_as_answered(question_id):
     if request.method == "OPTIONS":
         return jsonify({"message": "CORS preflight OK"}), 200
