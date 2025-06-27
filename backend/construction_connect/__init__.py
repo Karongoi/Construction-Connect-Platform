@@ -17,14 +17,16 @@ def create_app():
     migrate.init_app(app, db)
     jwt.init_app(app)
 
-    # FIX: Proper CORS settings
+    # Improved CORS setup — handles all methods and headers
     CORS(
         app,
         supports_credentials=True,
-        origins=["http://localhost:5173"]
+        origins=["http://localhost:5173"],
+        methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"]
     )
 
-    # Blueprints
+    # Import and register blueprints
     from .routes.auth import auth_bp
     from .routes.questions import questions_bp
     from .routes.answers import answers_bp

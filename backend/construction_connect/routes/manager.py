@@ -1,4 +1,3 @@
-# construction_connect/routes/manager.py
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from construction_connect.models import db, User, Answer, Question
@@ -6,6 +5,7 @@ from construction_connect.helpers import is_manager
 
 manager_bp = Blueprint("manager_bp", __name__)
 
+# Get all users
 @manager_bp.route("/users", methods=["GET"])
 @jwt_required()
 def get_all_users():
@@ -18,6 +18,7 @@ def get_all_users():
         for u in users
     ]), 200
 
+# Update user role
 @manager_bp.route("/users/<int:user_id>/role", methods=["PATCH"])
 @jwt_required()
 def update_user_role(user_id):
@@ -35,6 +36,7 @@ def update_user_role(user_id):
     db.session.commit()
     return jsonify({"message": f"User role updated to {new_role}"}), 200
 
+# Delete an answer
 @manager_bp.route("/answers/<int:answer_id>", methods=["DELETE"])
 @jwt_required()
 def delete_answer(answer_id):
@@ -49,6 +51,7 @@ def delete_answer(answer_id):
     db.session.commit()
     return jsonify({"message": "Answer deleted"}), 200
 
+# Dashboard summary
 @manager_bp.route("/dashboard", methods=["GET"])
 @jwt_required()
 def dashboard():
@@ -60,3 +63,87 @@ def dashboard():
         "total_questions": Question.query.count(),
         "total_answers": Answer.query.count(),
     }), 200
+
+# User stats summary
+@manager_bp.route("/user-stats", methods=["GET"])
+@jwt_required()
+def user_stats():
+    if not is_manager():
+        return jsonify({"error": "Access denied"}), 403
+
+    users = User.query.all()
+    stats = []
+
+    for user in users:
+        stats.append({
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "role": user.role,
+            "questions_count": len(user.questions),
+            "answers_count": len(user.answers)
+        })
+
+    return jsonify(stats), 200
+
+# Get all questions (filter by answered/unanswered/all)
+@manager_bp.route("/moderate/questions", methods=["GET"])
+@jwt_required()
+def get_all_questions_for_moderation():
+    if not is_manager():
+        return jsonify({"error": "Access denied"}), 403
+
+    answered = request.args.get("answered")  # answered=true or ?answered=false
+
+    if answered is not None:
+        is_answered = answered.lower() == "true"
+        questions = Question.query.filter_by(is_answered=is_answered).order_by(Question.created_at.desc()).all()
+    else:
+        questions = Question.query.order_by(Question.created_at.desc()).all()
+
+    return jsonify([
+        {
+            "id": q.id,
+            "title": q.title,
+            "body": q.body,
+            "tags": q.tags,
+            "user_id": q.user_id,
+            "asked_by": q.user.username if q.user else "Unknown",
+            "created_at": q.created_at.isoformat() if q.created_at else None,
+            "is_answered": q.is_answered
+        }
+        for q in questions
+    ]), 200
+
+# Delete a question
+@manager_bp.route("/moderate/questions/<int:question_id>", methods=["DELETE"])
+@jwt_required()
+def delete_question(question_id):
+    if not is_manager():
+        return jsonify({"error": "Access denied"}), 403
+
+    question = Question.query.get(question_id)
+    if not question:
+        return jsonify({"error": "Question not found"}), 404
+
+    db.session.delete(question)
+    db.session.commit()
+    return jsonify({"message": f"Question ID {question_id} deleted"}), 200
+
+# Mark a question as answered (with CORS preflight support)
+@manager_bp.route("/moderate/questions/<int:question_id>/mark-answered", methods=["PATCH", "OPTIONS"])
+@jwt_required(optional=True)
+def mark_question_as_answered(question_id):
+    if request.method == "OPTIONS":
+        return jsonify({"message": "CORS preflight OK"}), 200
+
+    if not is_manager():
+        return jsonify({"error": "Access denied"}), 403
+
+    question = Question.query.get(question_id)
+    if not question:
+        return jsonify({"error": "Question not found"}), 404
+
+    question.is_answered = True
+    db.session.commit()
+    return jsonify({"message": f"Question {question_id} marked as answered"}), 200

@@ -4,21 +4,29 @@ import axios from "axios";
 
 const AnswerForm = ({ questionId, onAnswered }) => {
   const [body, setBody] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
 
     try {
+      setLoading(true);
       await axios.post(
         `http://127.0.0.1:5000/answers/${questionId}`,
         { body },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
       );
       setBody("");
       if (onAnswered) onAnswered();
     } catch (err) {
       console.error("Failed to post answer:", err);
+      alert("Failed to submit answer. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -30,13 +38,15 @@ const AnswerForm = ({ questionId, onAnswered }) => {
         placeholder="Type your answer..."
         value={body}
         onChange={(e) => setBody(e.target.value)}
+        disabled={loading}
         required
       />
       <button
         type="submit"
         className="mt-2 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+        disabled={loading}
       >
-        Submit Answer
+        {loading ? "Submitting..." : "Submit Answer"}
       </button>
     </form>
   );

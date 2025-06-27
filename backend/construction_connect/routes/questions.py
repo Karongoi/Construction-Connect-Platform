@@ -3,14 +3,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from construction_connect.models import db, Question, User
 from construction_connect.helpers import is_manager
 
-questions_bp = Blueprint(
-    "questions_bp",
-    __name__,
-    url_prefix="/questions",  # <-- define it here
-    strict_slashes=False      # <-- prevent redirect issues
-)
+questions_bp = Blueprint("questions_bp", __name__, url_prefix="/questions")
 
-# POST a new question
 @questions_bp.route("/", methods=["POST"])
 @jwt_required()
 def post_question():
@@ -26,17 +20,12 @@ def post_question():
     db.session.add(q)
     db.session.commit()
 
-    return {
-        "message": "Question posted",
-        "id": q.id
-    }, 201
+    return {"message": "Question posted", "id": q.id}, 201
 
-# GET all questions
 @questions_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_questions():
-    questions = Question.query.order_by(Question.created_at.desc()).all()
-
+    questions = Question.query.filter_by(is_answered=False).order_by(Question.created_at.desc()).all()
     return jsonify([
         {
             "id": q.id,
@@ -45,12 +34,11 @@ def get_questions():
             "tags": q.tags,
             "user_id": q.user_id,
             "asked_by": q.user.username if q.user else "Unknown",
-            "created_at": q.created_at.isoformat()
-        }
-        for q in questions
+            "created_at": q.created_at.isoformat(),
+            "is_answered": q.is_answered
+        } for q in questions
     ]), 200
 
-# DELETE a question
 @questions_bp.route("/<int:id>", methods=["DELETE"])
 @jwt_required()
 def delete_question(id):
@@ -65,10 +53,9 @@ def delete_question(id):
     db.session.commit()
     return jsonify({"message": "Question deleted"}), 200
 
-# UPDATE a question
-@questions_bp.route("/<int:id>", methods=["PUT"])
+@questions_bp.route("/<int:id>/mark-answered", methods=["PATCH"])
 @jwt_required()
-def update_question(id):
+def mark_question_answered(id):
     if not is_manager():
         return jsonify({"error": "Access denied. Manager only."}), 403
 
@@ -76,10 +63,6 @@ def update_question(id):
     if not question:
         return jsonify({"error": "Question not found"}), 404
 
-    data = request.get_json()
-    question.title = data.get("title", question.title)
-    question.body = data.get("body", question.body)
-    question.tags = data.get("tags", question.tags)
-
+    question.is_answered = True
     db.session.commit()
-    return jsonify({"message": "Question updated"}), 200
+    return jsonify({"message": f"Question {id} marked as answered"}), 200

@@ -29,6 +29,7 @@ class Question(db.Model):
     tags = db.Column(db.String(200))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
+    is_answered = db.Column(db.Boolean, default=False)  # used for moderation
 
     answers = db.relationship("Answer", backref="question", lazy=True, cascade="all, delete-orphan")
 
@@ -55,7 +56,6 @@ class Mentorship(db.Model):
 
 class MentorshipRequest(db.Model):
     __tablename__ = "mentorship_requests"
-
     id = db.Column(db.Integer, primary_key=True)
     apprentice_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     mentor_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
