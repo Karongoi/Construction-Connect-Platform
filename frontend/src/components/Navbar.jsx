@@ -30,11 +30,18 @@ function Navbar() {
           Construction Connect
         </h1>
 
-        {isLoggedIn && role === "Manager" && (
+        {/* Show mentorship links ONLY for Apprentices */}
+        {isLoggedIn && role === "Apprentice" && (
           <div className="flex gap-4 text-sm">
-            <button onClick={() => navigate("/manager/dashboard")}>Dashboard</button>
-            <button onClick={() => navigate("/manager/users")}>Users</button>
-            <button onClick={() => navigate("/manager/moderate")}>Moderate</button>
+            <button onClick={() => navigate("/mentorship/available")}>
+              Find Mentors
+            </button>
+            <button onClick={() => navigate("/mentorship/requests")}>
+              My Requests
+            </button>
+            <button onClick={() => navigate("/mentorship/my-mentors")}>
+              My Mentors
+            </button>
           </div>
         )}
       </div>

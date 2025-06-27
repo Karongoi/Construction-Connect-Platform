@@ -21,9 +21,9 @@ const ManagerDashboard = () => {
     },
     {
       title: "Reports & Insights",
-      description: "Coming soon: platform statistics and trends.",
-      route: "#",
-      color: "bg-gray-100 text-gray-800",
+      description: "Write reports and review insights.",
+      route: "/manager/reports",  //  Enabled
+      color: "bg-green-100 text-green-800",
       emoji: "📊",
     },
   ];
@@ -36,7 +36,7 @@ const ManagerDashboard = () => {
         {cards.map((card, i) => (
           <div
             key={i}
-            onClick={() => card.route !== "#" && navigate(card.route)}
+            onClick={() => card.route && navigate(card.route)}
             className={`cursor-pointer p-6 rounded-xl shadow hover:shadow-xl transition-all duration-300 ${card.color}`}
           >
             <div className="text-4xl mb-3">{card.emoji}</div>

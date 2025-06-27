@@ -9,8 +9,8 @@ def is_manager():
     user = User.query.get(get_jwt_identity())
     return user and user.role == "Manager"
 
-# Get all users (admin only)
-@manager_bp.route("/users", methods=["GET"])
+#  Get all users (Manager only)
+@manager_bp.route("/manager/users", methods=["GET"])
 @jwt_required()
 def get_all_users():
     if not is_manager():
@@ -27,8 +27,8 @@ def get_all_users():
         for u in users
     ]), 200
 
-# Promote/Demote a user (Manager only)
-@manager_bp.route("/users/<int:user_id>/role", methods=["PATCH"])
+#  Promote/Demote a user (Manager only)
+@manager_bp.route("/manager/users/<int:user_id>/role", methods=["PATCH"])
 @jwt_required()
 def update_user_role(user_id):
     if not is_manager():
@@ -45,8 +45,8 @@ def update_user_role(user_id):
     db.session.commit()
     return jsonify({"message": f"User role updated to {new_role}"}), 200
 
-# Delete an answer
-@manager_bp.route("/answers/<int:answer_id>", methods=["DELETE"])
+#  Delete an answer (Manager only)
+@manager_bp.route("/manager/answers/<int:answer_id>", methods=["DELETE"])
 @jwt_required()
 def delete_answer(answer_id):
     if not is_manager():
@@ -60,8 +60,8 @@ def delete_answer(answer_id):
     db.session.commit()
     return jsonify({"message": "Answer deleted"}), 200
 
-# Platform summary
-@manager_bp.route("/dashboard", methods=["GET"])
+#  Platform summary dashboard (Manager only)
+@manager_bp.route("/manager/dashboard", methods=["GET"])
 @jwt_required()
 def dashboard():
     if not is_manager():
