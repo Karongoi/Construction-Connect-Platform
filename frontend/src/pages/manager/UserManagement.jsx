@@ -6,12 +6,20 @@ const UserManagement = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    axios
-      .get("http://127.0.0.1:5000/manager/users", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setUsers(res.data))
-      .catch((err) => console.error(err));
+
+    async function fetchUsers() {
+      try {
+        const res = await axios.get("http://127.0.0.1:5000/manager/users", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log(" USERS FETCHED:", res.data);  // LOG SUCCESS
+        setUsers(res.data);
+      } catch (err) {
+        console.error(" ERROR FETCHING USERS:", err.response?.data || err.message);  // LOG ERROR
+      }
+    }
+
+    fetchUsers();
   }, []);
 
   return (

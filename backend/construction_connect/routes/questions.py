@@ -1,14 +1,14 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from construction_connect.models import db, Question, User
+from construction_connect.helpers import is_manager
 
-questions_bp = Blueprint("questions_bp", __name__)
-
-# Helper to check if the current user is a manager
-def is_manager():
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-    return user and user.role == "manager"
+questions_bp = Blueprint(
+    "questions_bp",
+    __name__,
+    url_prefix="/questions",  # <-- define it here
+    strict_slashes=False      # <-- prevent redirect issues
+)
 
 # POST a new question
 @questions_bp.route("/", methods=["POST"])
@@ -33,7 +33,7 @@ def post_question():
 
 # GET all questions
 @questions_bp.route("/", methods=["GET"])
-@jwt_required()  # Make public by removing this if you want
+@jwt_required()
 def get_questions():
     questions = Question.query.order_by(Question.created_at.desc()).all()
 
@@ -44,13 +44,13 @@ def get_questions():
             "body": q.body,
             "tags": q.tags,
             "user_id": q.user_id,
-            "asked_by": q.user.username,
+            "asked_by": q.user.username if q.user else "Unknown",
             "created_at": q.created_at.isoformat()
         }
         for q in questions
     ]), 200
 
-# Manager-only: DELETE a question
+# DELETE a question
 @questions_bp.route("/<int:id>", methods=["DELETE"])
 @jwt_required()
 def delete_question(id):
@@ -65,7 +65,7 @@ def delete_question(id):
     db.session.commit()
     return jsonify({"message": "Question deleted"}), 200
 
-# Manager-only: UPDATE a question
+# UPDATE a question
 @questions_bp.route("/<int:id>", methods=["PUT"])
 @jwt_required()
 def update_question(id):
