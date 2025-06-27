@@ -16,17 +16,20 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    
-    CORS(app)  
+
+    CORS(app)
+
     # Import and register blueprints
     from .routes.auth import auth_bp
     from .routes.questions import questions_bp
     from .routes.answers import answers_bp
     from .routes.mentorship import mentorship_bp
+    from .routes.manager import manager_bp  # Import manager
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(questions_bp, url_prefix="/questions")
     app.register_blueprint(answers_bp, url_prefix="/answers")
     app.register_blueprint(mentorship_bp, url_prefix="/mentorship")
+    app.register_blueprint(manager_bp, url_prefix="/manager")  # Register manager
 
     return app

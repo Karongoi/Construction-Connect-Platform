@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const navigate = useNavigate(); // For redirecting
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,8 +23,16 @@ function Login() {
 
       if (res.ok) {
         alert("Login successful!");
-        localStorage.setItem("token", data.access_token); // Store token
-        navigate("/dashboard"); //  Redirect to dashboard
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Role-based redirect
+        const role = data.user.role;
+        if (role === "Site Manager") {
+          navigate("/manager/dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         alert(data.error || "Login failed");
       }

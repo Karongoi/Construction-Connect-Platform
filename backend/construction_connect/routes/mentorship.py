@@ -127,3 +127,60 @@ def respond_to_request(request_id):
 
     db.session.commit()
     return jsonify({"message": f"Mentorship request {action}ed"}), 200
+
+# Apprentice views their current active mentors
+@mentorship_bp.route("/my-mentors", methods=["GET"])
+@jwt_required()
+def view_my_mentors():
+    current_user_id = get_jwt_identity()
+
+    mentorships = Mentorship.query.filter_by(apprentice_id=current_user_id, status="active").all()
+
+    result = []
+    for m in mentorships:
+        mentor = User.query.get(m.mentor_id)
+        result.append({
+            "mentor_id": mentor.id,
+            "mentor_name": mentor.username,
+            "email": mentor.email,
+            "status": m.status,
+            "joined_at": m.created_at.isoformat() if m.created_at else None
+        })
+
+    return jsonify(result), 200
+
+# Apprentice lists available Journeymen to request mentorship from
+@mentorship_bp.route("/available-mentors", methods=["GET"])
+@jwt_required()
+def list_available_mentors():
+    current_user_id = get_jwt_identity()
+
+    journeymen = User.query.filter(User.role == "Journeyman", User.id != current_user_id).all()
+
+    result = []
+    for jm in journeymen:
+        result.append({
+            "id": jm.id,
+            "username": jm.username,
+            "email": jm.email,
+        })
+
+    return jsonify(result), 200
+
+# Apprentice cancels a pending mentorship request
+@mentorship_bp.route("/requests/<int:request_id>", methods=["DELETE"])
+@jwt_required()
+def cancel_request(request_id):
+    current_user_id = get_jwt_identity()
+    request_entry = MentorshipRequest.query.get(request_id)
+
+    if not request_entry or request_entry.apprentice_id != current_user_id:
+        return jsonify({"error": "Request not found or unauthorized"}), 404
+
+    if request_entry.status != "pending":
+        return jsonify({"error": "Only pending requests can be cancelled"}), 400
+
+    db.session.delete(request_entry)
+    db.session.commit()
+
+    return jsonify({"message": "Request cancelled successfully"}), 200
