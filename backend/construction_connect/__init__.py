@@ -17,11 +17,11 @@ def create_app():
     migrate.init_app(app, db)
     jwt.init_app(app)
 
-    # Improved CORS setup — handles all methods and headers
+    # CORS setup — allows frontend to communicate with backend
     CORS(
         app,
         supports_credentials=True,
-        origins=["http://localhost:5173"],
+        origins=["http://localhost:5173"],  # update if frontend is deployed
         methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization"]
     )
@@ -38,5 +38,10 @@ def create_app():
     app.register_blueprint(answers_bp, url_prefix="/answers")
     app.register_blueprint(mentorship_bp, url_prefix="/mentorship")
     app.register_blueprint(manager_bp, url_prefix="/manager")
+
+    # Root route to confirm service is live
+    @app.route("/")
+    def index():
+        return {"message": "🚧 Construction Connect API is live!"}
 
     return app
