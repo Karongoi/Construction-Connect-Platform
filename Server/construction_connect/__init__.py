@@ -21,7 +21,7 @@ def create_app():
     CORS(
         app,
         supports_credentials=True,
-        origins=["http://localhost:5173"],  # update if frontend is deployed
+        origins=["https://construction-connect-platform-1.onrender.com/"],  # update if frontend is deployed
         methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Content-Type", "Authorization"]
     )

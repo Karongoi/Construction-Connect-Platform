@@ -30,11 +30,22 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        return jsonify({"message": "User registered successfully"}), 201
+        token = create_access_token(identity=user.id, expires_delta=timedelta(hours=3))
+
+        return jsonify({
+            "message": "User registered successfully",
+            "access_token": token,
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "role": user.role
+            }
+        }), 201
 
     except Exception as e:
         print("REGISTER ERROR:", e)
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Server error"}), 500
 
 
 

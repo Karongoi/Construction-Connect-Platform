@@ -12,7 +12,7 @@ manager_bp = Blueprint("manager_bp", __name__)
 
 @manager_bp.route("/users", methods=["GET"])
 @jwt_required()
-@cross_origin(origin='http://localhost:5173')
+@cross_origin(origin='https://construction-connect-platform-1.onrender.com/')
 def get_all_users():
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
@@ -25,7 +25,7 @@ def get_all_users():
 
 @manager_bp.route("/users/<int:user_id>/role", methods=["PATCH"])
 @jwt_required()
-@cross_origin(origin='http://localhost:5173')
+@cross_origin(origin='https://construction-connect-platform-1.onrender.com/')
 def update_user_role(user_id):
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
@@ -47,7 +47,7 @@ def update_user_role(user_id):
 
 @manager_bp.route("/answers/<int:answer_id>", methods=["DELETE"])
 @jwt_required()
-@cross_origin(origin='http://localhost:5173')
+@cross_origin(origin='https://construction-connect-platform-1.onrender.com/')
 def delete_answer(answer_id):
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
@@ -66,7 +66,7 @@ def delete_answer(answer_id):
 
 @manager_bp.route("/dashboard", methods=["GET"])
 @jwt_required()
-@cross_origin(origin='http://localhost:5173')
+@cross_origin(origin='https://construction-connect-platform-1.onrender.com/')
 def dashboard():
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
@@ -79,7 +79,7 @@ def dashboard():
 
 @manager_bp.route("/user-stats", methods=["GET"])
 @jwt_required()
-@cross_origin(origin='http://localhost:5173')
+@cross_origin(origin='https://construction-connect-platform-1.onrender.com/')
 def user_stats():
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
@@ -104,7 +104,7 @@ def user_stats():
 
 @manager_bp.route("/moderate/questions", methods=["GET"])
 @jwt_required()
-@cross_origin(origin='http://localhost:5173')
+@cross_origin(origin='https://construction-connect-platform-1.onrender.com/')
 def get_all_questions_for_moderation():
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
@@ -132,7 +132,7 @@ def get_all_questions_for_moderation():
 
 @manager_bp.route("/moderate/questions/<int:question_id>", methods=["DELETE"])
 @jwt_required()
-@cross_origin(origin='http://localhost:5173')
+@cross_origin(origin='https://construction-connect-platform-1.onrender.com/')
 def delete_question(question_id):
     if not is_manager():
         return jsonify({"error": "Access denied"}), 403
@@ -147,7 +147,7 @@ def delete_question(question_id):
 
 @manager_bp.route("/moderate/questions/<int:question_id>/mark-answered", methods=["PATCH", "OPTIONS"])
 @jwt_required(optional=True)
-@cross_origin(origin='http://localhost:5173', methods=["PATCH", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
+@cross_origin(origin='https://construction-connect-platform-1.onrender.com/', methods=["PATCH", "OPTIONS"], allow_headers=["Content-Type", "Authorization"])
 def mark_question_as_answered(question_id):
     if request.method == "OPTIONS":
         return jsonify({"message": "CORS preflight OK"}), 200
