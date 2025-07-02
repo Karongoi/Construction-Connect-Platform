@@ -58,3 +58,5 @@ https://1drv.ms/p/c/481f49ab7bfe3a53/EU0jKFAs6zZCr4mUtM_WC4gBIXNKFjZTPNbC_lwRl7K
 I faced some issues with deploying the front end "Client" but i found a way around it, by putting it in its own repo
 Here is the repo link https://github.com/Karongoi/Client.git . I am still working toward figuring out why.
 
+Here's the project presentation
+https://youtu.be/c1TICpER-NQ?si=V_sIAQbS5BlI5YhK
